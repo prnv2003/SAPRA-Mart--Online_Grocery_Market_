@@ -7,7 +7,7 @@ import com.sapramart.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final UserRepository userRepository;
