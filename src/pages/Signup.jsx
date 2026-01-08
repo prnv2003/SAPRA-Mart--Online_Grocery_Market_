@@ -1,3 +1,4 @@
+import { signupUser } from "../services/api";
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import logo from "../assets/sapra-logo.jpeg";
@@ -11,13 +12,32 @@ function Signup() {
     confirmPassword: "",
   });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // ✅ ONLY ONE handleSignup
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    console.log("Signup clicked", formData);
+
+    if (formData.password !== formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    try {
+      const response = await signupUser({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      });
+
+      alert(response);
+    } catch (error) {
+      console.error("Signup error:", error);
+      alert("Signup failed");
+    }
   };
 
-  const handleSignup = (e) => {
-    e.preventDefault();
-    console.log(formData);
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
@@ -35,6 +55,7 @@ function Signup() {
           <h3>Create Account ✨</h3>
           <p className="subtitle">Join SAPRA Mart</p>
 
+          {/* ✅ FORM WIRED CORRECTLY */}
           <form onSubmit={handleSignup}>
             <input
               type="text"
