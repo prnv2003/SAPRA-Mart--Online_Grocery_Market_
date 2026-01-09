@@ -1,9 +1,9 @@
 package com.sapramart.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.sapramart.model.User;
 import com.sapramart.repository.UserRepository;
-
 
 @RestController
 @RequestMapping("/api/auth")
@@ -18,9 +18,10 @@ public class AuthController {
 
     // SIGNUP API
     @PostMapping("/signup")
-    public String signup(@RequestBody User user) {
+    public ResponseEntity<String> signup(@RequestBody User user) {
+        System.out.println("Signup request received: " + user.getEmail());
         userRepository.save(user);
-        return "User registered successfully";
+        return ResponseEntity.ok("User registered successfully");
     }
 
     // LOGIN API
@@ -29,7 +30,7 @@ public class AuthController {
         User existingUser = userRepository.findByEmail(user.getEmail());
 
         if (existingUser != null &&
-            existingUser.getPassword().equals(user.getPassword())) {
+                existingUser.getPassword().equals(user.getPassword())) {
             return "Login successful";
         }
         return "Invalid credentials";

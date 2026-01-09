@@ -1,7 +1,5 @@
-const BASE_URL = "http://localhost:8080/api/auth";
-
 export const signupUser = async (data) => {
-  const response = await fetch(`${BASE_URL}/signup`, {
+  const response = await fetch("http://localhost:8080/api/auth/signup", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -9,5 +7,11 @@ export const signupUser = async (data) => {
     body: JSON.stringify(data),
   });
 
-  return response.text();
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || "Signup failed");
+  }
+
+  return text;
 };
