@@ -47,10 +47,10 @@ function Signup() {
       setTimeout(() => {
         navigate("/");
       }, 1500);
-
+    
     } catch (error) {
       setPopupType("error");
-      setPopupMessage("Signup failed. Please try again.");
+      setPopupMessage(error.message || "Signup failed. Please try again.");
     }
   };
 
@@ -58,7 +58,7 @@ function Signup() {
     <>
       <div className="signup-container">
         <div className="signup-card">
-
+        
           {/* LEFT */}
           <div className="signup-left">
             <img src={logo} alt="SAPRA Mart Logo" className="logo" />
@@ -140,9 +140,7 @@ function Signup() {
       {popupMessage && (
         <div className="popup-overlay">
           <div className={`popup-box ${popupType}`}>
-            <h3>
-              {popupType === "success" ? "✅ Success" : "❌ Error"}
-            </h3>
+            <h3>{popupType === "success" ? "✅ Success" : "❌ Error"}</h3>
             <p>{popupMessage}</p>
 
             {popupType === "success" && (
@@ -150,10 +148,7 @@ function Signup() {
             )}
 
             {popupType === "error" && (
-              <button
-                className="popup-btn"
-                onClick={() => setPopupMessage("")}
-              >
+              <button className="popup-btn" onClick={() => setPopupMessage("")}>
                 OK
               </button>
             )}

@@ -1,7 +1,10 @@
 package com.sapramart.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 import com.sapramart.model.User;
 import com.sapramart.repository.UserRepository;
 
@@ -11,28 +14,55 @@ import com.sapramart.repository.UserRepository;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public AuthController(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    // SIGNUP API
+    // ================= SIGNUP =================
+
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody User user) {
-        System.out.println("Signup request received: " + user.getEmail());
-        userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully");
+
+        user.setEmail(user.getEmail().trim().toLowerCase());
+
+        try {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userRepository.save(user);
+
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body("User registered successfully");
+
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body("Email already registered");
+        }
     }
 
-    // LOGIN API
+    // ================= LOGIN =================
+
     @PostMapping("/login")
-    public String login(@RequestBody User user) {
+    public ResponseEntity<String> login(@RequestBody User user) {
+
         User existingUser = userRepository.findByEmail(user.getEmail());
 
-        if (existingUser != null &&
-                existingUser.getPassword().equals(user.getPassword())) {
-            return "Login successful";
+        if (existingUser == null) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("Invalid email or password");
         }
-        return "Invalid credentials";
+
+        if (!existingUser.getPassword().equals(user.getPassword())) {
+            return ResponseEntity
+                    .status(HttpStatus.OK)
+                    .body("Invalid email or password");
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body("Login successful");
     }
 }
