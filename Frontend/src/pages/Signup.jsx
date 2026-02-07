@@ -41,7 +41,7 @@ function Signup() {
 
       // ✅ Success
       setPopupType("success");
-      setPopupMessage(response);
+      setPopupMessage(response.message);
 
       // Redirect only on success
       setTimeout(() => {

@@ -2,9 +2,8 @@ package com.sapramart.model;
 
 import jakarta.persistence.*;
 
-
 @Entity
-@Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
+@Table(name = "user")
 public class User {
 
     @Id
@@ -12,16 +11,10 @@ public class User {
     private Long id;
 
     private String name;
-
-    @Column(nullable = false, unique = true)
     private String email;
-
-    @Column(nullable = false)
     private String password;
 
-    public User() {
-    }
-
+    // Getters & Setters
     public Long getId() {
         return id;
     }
@@ -49,7 +42,7 @@ public class User {
     public String getPassword() {
         return password;
     }
-
+    
     public void setPassword(String password) {
         this.password = password;
     }

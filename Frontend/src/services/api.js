@@ -10,13 +10,14 @@ export const signupUser = async (data) => {
     body: JSON.stringify(data),
   });
 
-  const text = await response.text();
+  // ✅ Always parse JSON
+  const json = await response.json();
 
   if (!response.ok) {
-    throw new Error(text || "Signup failed");
+    throw new Error(json.message || "Signup failed");
   }
 
-  return text; // Signup returns plain text
+  return json; // { success, message }
 };
 
 // ================= LOGIN =================
@@ -29,11 +30,11 @@ export const loginUser = async (data) => {
     body: JSON.stringify(data),
   });
 
-  const json = await response.json(); // 🔥 IMPORTANT CHANGE
+  const json = await response.json();
 
   if (!response.ok) {
     throw new Error(json.message || "Login failed");
   }
 
-  return json; // { success: true/false, message: "..." }
+  return json; // { success, message }
 };

@@ -1,0 +1,46 @@
+.dashboard-container {
+  padding: 40px;
+}
+
+.dashboard-container h2 {
+  color: #2e7d32;
+  margin-bottom: 30px;
+}
+
+.dashboard-cards {
+  display: flex;
+  gap: 20px;
+}
+
+.card {
+  background: #f6fff6;
+  border-radius: 12px;
+  padding: 25px;
+  width: 200px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.card p {
+  font-size: 24px;
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.logout-btn {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+
+

@@ -24,6 +24,8 @@ function Login() {
       const response = await loginUser({ email, password });
 
       if (response.success) {
+        localStorage.setItem("isLoggedIn", "true");
+
         setPopup({
           show: true,
           message: "Login Successful 🎉",

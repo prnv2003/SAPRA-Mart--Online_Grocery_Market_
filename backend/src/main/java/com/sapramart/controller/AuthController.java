@@ -1,68 +1,73 @@
 package com.sapramart.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-
 import com.sapramart.model.User;
 import com.sapramart.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 @CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    @Autowired
+    private UserRepository userRepository;
 
-    public AuthController(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     // ================= SIGNUP =================
-
     @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> signup(@RequestBody User user) {
 
-        user.setEmail(user.getEmail().trim().toLowerCase());
+        Map<String, Object> response = new HashMap<>();
 
-        try {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepository.save(user);
-
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body("User registered successfully");
-
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body("Email already registered");
+        // ✅ CHECK IF EMAIL ALREADY EXISTS
+        User existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser != null) {
+            response.put("success", false);
+            response.put("message", "Email already registered");
+            return ResponseEntity.ok(response);
         }
+
+        // 🔐 Encrypt password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepository.save(user);
+
+        response.put("success", true);
+        response.put("message", "User registered successfully");
+        return ResponseEntity.ok(response);
     }
 
     // ================= LOGIN =================
-
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody User user) {
+
+        Map<String, Object> response = new HashMap<>();
 
         User existingUser = userRepository.findByEmail(user.getEmail());
 
         if (existingUser == null) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("Invalid email or password");
+            response.put("success", false);
+            response.put("message", "Invalid email or password");
+            return ResponseEntity.ok(response);
         }
 
-        if (!existingUser.getPassword().equals(user.getPassword())) {
-            return ResponseEntity
-                    .status(HttpStatus.OK)
-                    .body("Invalid email or password");
+        // 🔐 BCrypt password comparison
+        if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
+            response.put("success", false);
+            response.put("message", "Invalid email or password");
+            return ResponseEntity.ok(response);
         }
 
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .body("Login successful");
+        response.put("success", true);
+        response.put("message", "Login successful");
+        return ResponseEntity.ok(response);
     }
 }
