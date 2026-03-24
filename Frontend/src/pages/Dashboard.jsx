@@ -1,40 +1,67 @@
-import React from "react";
-import "./Dashboard.css";
+import React, { useEffect, useState } from "react";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import StatsCard from "../components/StatsCard";
+import { getProducts } from "../services/productApi";
+import "../styles/Dashboard.css";
 
 function Dashboard() {
-  const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    window.location.href = "/";
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  const loadProducts = async () => {
+    const data = await getProducts();
+    setProducts(data);
   };
 
   return (
-    <div className="dashboard-container">
-      <h2>Welcome to SAPRA Mart Dashboard 👋</h2>
+    <div className="dashboard-layout">
+      <Sidebar />
 
-      <div className="dashboard-cards">
-        <div className="card">
-          <h3>Total Products</h3>
-          <p>0</p>
+      <div className="main-content">
+        <Header />
+
+        {/* STATS */}
+        <div className="stats">
+          <StatsCard title="Total Products" value={products.length} />
+          <StatsCard
+            title="Total Stock"
+            value={products.reduce((sum, p) => sum + p.quantity, 0)}
+          />
         </div>
 
-        <div className="card">
-          <h3>Available Stock</h3>
-          <p>0</p>
-        </div>
+        {/* RECENT PRODUCTS */}
+        <div className="recent">
+          <h3>Recent Products</h3>
 
-        <div className="card">
-          <h3>Orders</h3>
-          <p>0</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Qty</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {products.slice(0, 5).map((p) => (
+                <tr key={p.id}>
+                  <td>{p.name}</td>
+                  <td>{p.category}</td>
+                  <td>₹{p.price}</td>
+                  <td>{p.quantity}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-
-      <button onClick={handleLogout} className="logout-btn">
-        Logout
-      </button>
     </div>
   );
 }
 
 export default Dashboard;
-
-
