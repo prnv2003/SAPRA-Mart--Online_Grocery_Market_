@@ -113,6 +113,14 @@
   opacity: 0.9;
 }
 
+button {
+  transition: 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
 /* LOGIN LINK */
 .login-link {
   margin-top: 15px;

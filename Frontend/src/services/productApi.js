@@ -13,3 +13,20 @@ export const getProducts = async () => {
   const response = await fetch(PRODUCT_URL);
   return response.json();
 };
+
+// 🗑️ DELETE
+export const deleteProduct = async (id) => {
+  await fetch(`${PRODUCT_URL}/${id}`, {
+    method: "DELETE",
+  });
+};
+
+// ✏️ UPDATE
+export const updateProduct = async (id, product) => {
+  const response = await fetch(`${PRODUCT_URL}/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(product),
+  });
+  return response.json();
+};

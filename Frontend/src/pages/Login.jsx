@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/sapra-logo.jpeg";
 import { loginUser } from "../services/api";
-import "./Login.css";
+import "../styles/Login.css";
 
 function Login() {
   const navigate = useNavigate();

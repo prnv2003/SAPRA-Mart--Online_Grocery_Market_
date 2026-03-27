@@ -2,7 +2,7 @@ import { signupUser } from "../services/api";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/sapra-logo.jpeg";
-import "./Signup.css";
+import "../styles/Signup.css";
 
 function Signup() {
   const navigate = useNavigate();
