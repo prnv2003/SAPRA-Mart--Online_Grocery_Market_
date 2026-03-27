@@ -3,10 +3,19 @@ const PRODUCT_URL = "http://localhost:8080/api/products";
 export const addProduct = async (product) => {
   const response = await fetch(PRODUCT_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(product),
   });
-  return response.json();
+
+  const data = await response.json(); // 🔥 ALWAYS JSON
+
+  if (!response.ok) {
+    throw new Error(data.message);
+  }
+
+  return data;
 };
 
 export const getProducts = async () => {

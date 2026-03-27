@@ -3,7 +3,7 @@ package com.sapramart.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products") // 🔥 IMPORTANT (matches your DB)
 public class Product {
 
     @Id
@@ -15,7 +15,8 @@ public class Product {
     private double price;
     private int quantity;
 
-    // Getters & Setters
+    // GETTERS & SETTERS
+
     public Long getId() {
         return id;
     }

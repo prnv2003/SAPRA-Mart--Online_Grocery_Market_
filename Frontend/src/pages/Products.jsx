@@ -23,42 +23,120 @@ function Products() {
     loadProducts();
   }, []);
 
+  const [toast, setToast] = useState({
+    show: false,
+    message: "",
+    type: "",
+  });
+
+  // Auto-hide toast notification after 2500ms
+  useEffect(() => {
+    if (toast.show) {
+      setTimeout(() => {
+        setToast({ show: false, message: "", type: "" });
+      }, 2500);
+    }
+  }, [toast]);
+
   const loadProducts = async () => {
-    const data = await getProducts();
-    setProducts(data);
+    try {
+      const data = await getProducts();
+      setProducts(data || []);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    }
   };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // 🔥 FIXED HANDLE SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (editId) {
-      await updateProduct(editId, form);
-      setEditId(null);
-    } else {
-      await addProduct(form);
+    // ✅ VALIDATION
+    if (!form.name || !form.category || !form.price || !form.quantity) {
+      alert("Please fill all fields ❌");
+      return;
     }
 
-    setForm({ name: "", category: "", price: "", quantity: "" });
-    loadProducts();
+    // ✅ CONVERT TYPES
+    const productData = {
+      name: form.name.trim(),
+      category: form.category.trim(),
+      price: Number(form.price),
+      quantity: Number(form.quantity),
+    };
+
+    try {
+      if (editId) {
+        // ✏️ UPDATE PRODUCT
+        await updateProduct(editId, productData);
+        setToast({
+          show: true,
+          message: "Product updated ✅",
+          type: "success",
+        });
+        setEditId(null);
+      } else {
+        // ➕ ADD PRODUCT
+        await addProduct(productData);
+        setToast({ show: true, message: "Product added 🎉", type: "success" });
+      }
+
+      // 🔄 RELOAD PRODUCTS
+      await loadProducts();
+
+      // 🧹 RESET FORM
+      setForm({
+        name: "",
+        category: "",
+        price: "",
+        quantity: "",
+      });
+    } catch (error) {
+      //  🔥 HANDLE DUPLICATE ERROR
+      setToast({
+        show: true,
+        message: error.message || "Product already exists ❌",
+        type: "error",
+      });
+    }
   };
 
   const handleEdit = (product) => {
-    setForm(product);
+    setForm({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      quantity: product.quantity,
+    });
     setEditId(product.id);
   };
 
   const handleDelete = async (id) => {
-    await deleteProduct(id);
-    loadProducts();
+    try {
+      await deleteProduct(id);
+      alert("Product deleted 🗑️");
+      loadProducts();
+    } catch (error) {
+      alert("Delete failed ❌");
+    }
   };
 
   return (
     <div className="products-layout">
       <Sidebar />
+
+      {toast.show && (
+        <div className={`toast-container ${toast.type}`}>
+          <div className="toast-icon">
+            {toast.type === "success" ? "✅" : "❌"}
+          </div>
+          <div className="toast-text">{toast.message}</div>
+        </div>
+      )}
 
       <div className="products-content">
         <h2>Product Inventory 📦</h2>
@@ -82,6 +160,7 @@ function Products() {
           <input
             name="price"
             placeholder="Price"
+            type="number"
             value={form.price}
             onChange={handleChange}
             required
@@ -89,6 +168,7 @@ function Products() {
           <input
             name="quantity"
             placeholder="Quantity"
+            type="number"
             value={form.quantity}
             onChange={handleChange}
             required
