@@ -10,3 +10,4 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 🔥 CHECK IF PRODUCT EXISTS
     Optional<Product> findByName(String name);
 }
+
