@@ -40,6 +40,32 @@ button:hover {
   transform: scale(1.05);
 }
 
+/* FILTERS */
+.filters {
+  display: flex;
+  gap: 10px;
+  /* margin-left: 10px; */
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.filters input,
+.filters select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* LOW STOCK BADGE */
+.low-badge {
+  background: #e53935;
+  color: white;
+  padding: 2px 6px;
+  margin-left: 6px;
+  border-radius: 5px;
+  font-size: 10px;
+}
+
 /* TABLE RESPONSIVE */
 table {
   width: 100%;

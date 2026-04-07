@@ -9,6 +9,10 @@ import {
 import "../styles/Products.css";
 
 function Products() {
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sortType, setSortType] = useState("");
+
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({
     name: "",
@@ -125,6 +129,17 @@ function Products() {
     }
   };
 
+  const filteredProducts = products
+    .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    .filter((p) => (categoryFilter ? p.category === categoryFilter : true))
+    .sort((a, b) => {
+      if (sortType === "priceLow") return a.price - b.price;
+      if (sortType === "priceHigh") return b.price - a.price;
+      if (sortType === "qtyLow") return a.quantity - b.quantity;
+      if (sortType === "qtyHigh") return b.quantity - a.quantity;
+      return 0;
+    });
+
   return (
     <div className="products-layout">
       <Sidebar />
@@ -179,6 +194,43 @@ function Products() {
           </button>
         </form>
 
+        <br />
+        {/* SEARCH */}
+        <div className="filters">
+          <input
+            type="text"
+            placeholder="Search product 🔍"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+
+          {/* CATEGORY FILTER */}
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            <option value="Grains">Grains</option>
+            <option value="Dairy">Dairy</option>
+            <option value="Fruits">Fruits</option>
+            <option value="Vegetables">Vegetables</option>
+            <option value="Snacks">Snacks</option>
+            <option value="Beverages">Beverages</option>
+          </select>
+
+          {/* SORT */}
+          <select
+            value={sortType}
+            onChange={(e) => setSortType(e.target.value)}
+          >
+            <option value="">Sort By</option>
+            <option value="priceLow">Price ↑</option>
+            <option value="priceHigh">Price ↓</option>
+            <option value="qtyLow">Quantity ↑</option>
+            <option value="qtyHigh">Quantity ↓</option>
+          </select>
+        </div>
+
         {/* TABLE */}
         <div className="table-wrapper">
           {products.length === 0 ? (
@@ -199,12 +251,17 @@ function Products() {
               </thead>
 
               <tbody>
-                {products.map((p) => (
+                {filteredProducts.map((p) => (
                   <tr key={p.id} className={p.quantity < 5 ? "low-stock" : ""}>
                     <td>{p.name}</td>
                     <td>{p.category}</td>
                     <td>₹{p.price}</td>
-                    <td>{p.quantity}</td>
+                    <td>
+                      {p.quantity}
+                      {p.quantity < 10 && (
+                        <span className="low-badge">Low</span>
+                      )}
+                    </td>
 
                     <td>
                       <button onClick={() => handleEdit(p)}>✏️</button>
