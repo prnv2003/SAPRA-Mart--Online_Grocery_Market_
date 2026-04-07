@@ -1,5 +1,6 @@
 package com.sapramart.controller;
 
+import com.sapramart.config.JwtUtil;
 import com.sapramart.model.User;
 import com.sapramart.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -22,15 +24,20 @@ public class AuthController {
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     // ================= SIGNUP =================
     @PostMapping("/signup")
     public ResponseEntity<Map<String, Object>> signup(@RequestBody User user) {
 
         Map<String, Object> response = new HashMap<>();
 
+        user.setRole("CUSTOMER");
+
         // ✅ CHECK IF EMAIL ALREADY EXISTS
-        User existingUser = userRepository.findByEmail(user.getEmail());
-        if (existingUser != null) {
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
             response.put("success", false);
             response.put("message", "Email already registered");
             return ResponseEntity.ok(response);
@@ -47,27 +54,28 @@ public class AuthController {
 
     // ================= LOGIN =================
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody User user) {
+    public ResponseEntity<?> login(@RequestBody User user) {
 
-        Map<String, Object> response = new HashMap<>();
+        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
 
-        User existingUser = userRepository.findByEmail(user.getEmail());
+        if (existingUser.isPresent()) {
+            User dbUser = existingUser.get();
 
-        if (existingUser == null) {
-            response.put("success", false);
-            response.put("message", "Invalid email or password");
-            return ResponseEntity.ok(response);
+            if (passwordEncoder.matches(user.getPassword(), dbUser.getPassword())) {
+
+                String token = jwtUtil.generateToken(
+                        dbUser.getEmail(),
+                        dbUser.getRole());
+
+                return ResponseEntity.ok(Map.of(
+                        "success", true,
+                        "token", token,
+                        "role", dbUser.getRole()));
+            }
         }
 
-        // 🔐 BCrypt password comparison
-        if (!passwordEncoder.matches(user.getPassword(), existingUser.getPassword())) {
-            response.put("success", false);
-            response.put("message", "Invalid email or password");
-            return ResponseEntity.ok(response);
-        }
-
-        response.put("success", true);
-        response.put("message", "Login successful");
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(401).body(Map.of(
+                "success", false,
+                "message", "Invalid email or password"));
     }
 }

@@ -1,26 +1,28 @@
+import { getAuthHeader } from "./api";
+
 const PRODUCT_URL = "http://localhost:8080/api/products";
 
-export const addProduct = async (product) => {
-  const response = await fetch(PRODUCT_URL, {
+export const getProducts = async () => {
+  const res = await fetch(PRODUCT_URL, {
+    headers: {
+      ...getAuthHeader(),
+    },
+  });
+
+  return res.json();
+};
+
+export const addProduct = async (data) => {
+  const res = await fetch(PRODUCT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      ...getAuthHeader(),
     },
-    body: JSON.stringify(product),
+    body: JSON.stringify(data),
   });
 
-  const data = await response.json(); // 🔥 ALWAYS JSON
-
-  if (!response.ok) {
-    throw new Error(data.message);
-  }
-
-  return data;
-};
-
-export const getProducts = async () => {
-  const response = await fetch(PRODUCT_URL);
-  return response.json();
+  return res.json();
 };
 
 // 🗑️ DELETE

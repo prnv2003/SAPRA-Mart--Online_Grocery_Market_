@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import { getProducts } from "../services/productApi";
+
 import {
   BarChart,
   Bar,
@@ -30,9 +32,17 @@ function Dashboard() {
 
   const totalStock = products.reduce((sum, p) => sum + p.quantity, 0);
 
+  // const handleLogout = () => {
+  //   localStorage.removeItem("isLoggedIn");
+  //   window.location.href = "/";
+  // };
+
+  const navigate = useNavigate();
+
   const handleLogout = () => {
-    localStorage.removeItem("isLoggedIn");
-    window.location.href = "/";
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/");
   };
 
   const chartData = products.map((p) => ({

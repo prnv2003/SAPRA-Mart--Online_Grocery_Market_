@@ -21,10 +21,12 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await loginUser({ email, password });
+      const res = await loginUser({ email, password });
 
-      if (response.success) {
-        localStorage.setItem("isLoggedIn", "true");
+      if (res.success) {
+        // 🔐 STORE TOKEN + ROLE
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("role", res.role);
 
         setPopup({
           show: true,
@@ -32,21 +34,25 @@ function Login() {
           success: true,
         });
 
-        // ⏳ Redirect after 1.5 sec
+        // 🚀 REDIRECT BASED ON ROLE
         setTimeout(() => {
-          navigate("/dashboard");
-        }, 1500);
+          if (res.role === "ADMIN") {
+            navigate("/dashboard");
+          } else {
+            navigate("/shop");
+          }
+        }, 1200);
       } else {
         setPopup({
           show: true,
-          message: "Invalid email or password ❌",
+          message: res.message || "Invalid email or Password ❌",
           success: false,
         });
       }
     } catch (error) {
       setPopup({
         show: true,
-        message: "Server error. Please try again.",
+        message: error.message || "Server error. Please try again ❌",
         success: false,
       });
     }
