@@ -85,6 +85,14 @@
   background: #fff3e0;
 }
 
+/* Graphs & charts */
+.chart-container {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+}
+
 /* ACTION */
 .actions {
   margin-bottom: 25px;

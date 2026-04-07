@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 import {
   addProduct,
   getProducts,
@@ -140,6 +142,24 @@ function Products() {
       return 0;
     });
 
+  const exportToExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(products);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const file = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(file, "SapraProducts.xlsx");
+  };
+
   return (
     <div className="products-layout">
       <Sidebar />
@@ -216,6 +236,11 @@ function Products() {
             <option value="Vegetables">Vegetables</option>
             <option value="Snacks">Snacks</option>
             <option value="Beverages">Beverages</option>
+            <option value="Essentials">Essentials</option>
+            <option value="Cleaning">Cleaning</option>
+            <option value="Personal Care">Personal Care</option>
+            <option value="Frozen">Frozen</option>
+
           </select>
 
           {/* SORT */}
@@ -230,6 +255,10 @@ function Products() {
             <option value="qtyHigh">Quantity ↓</option>
           </select>
         </div>
+
+        <button onClick={exportToExcel} className="export-btn">
+          Export Excel 📁
+        </button>
 
         {/* TABLE */}
         <div className="table-wrapper">

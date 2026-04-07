@@ -1,6 +1,15 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { getProducts } from "../services/productApi";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
 import "../styles/Dashboard.css";
 
 function Dashboard() {
@@ -26,13 +35,16 @@ function Dashboard() {
     window.location.href = "/";
   };
 
+  const chartData = products.map((p) => ({
+    name: p.name,
+    stock: p.quantity,
+  }));
+
   return (
     <div className="dashboard-layout">
-      
       <Sidebar />
 
       <div className="main-content">
-
         {/* HEADER */}
         <div className="header">
           <h2>Welcome back, Pranav 👋</h2>
@@ -56,10 +68,22 @@ function Dashboard() {
 
           <div className="card highlight">
             <h4>Low Stock Items</h4>
-            <p>
-              {products.filter((p) => p.quantity < 5).length}
-            </p>
+            <p>{products.filter((p) => p.quantity < 5).length}</p>
           </div>
+        </div>
+
+        {/* Add Graph UI */}
+        <div className="chart-container">
+          <h3>Stock Overview 📊</h3>
+
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={chartData}>
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Bar dataKey="stock" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
         {/* QUICK ACTION */}

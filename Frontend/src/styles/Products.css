@@ -66,6 +66,17 @@ button:hover {
   font-size: 10px;
 }
 
+/* Export Buttton */
+.export-btn {
+  background: #1e88e5;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
 /* TABLE RESPONSIVE */
 table {
   width: 100%;
