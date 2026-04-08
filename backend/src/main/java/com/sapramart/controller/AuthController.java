@@ -63,14 +63,16 @@ public class AuthController {
 
             if (passwordEncoder.matches(user.getPassword(), dbUser.getPassword())) {
 
+                String role = dbUser.getRole() != null ? dbUser.getRole() : "USER";
+
                 String token = jwtUtil.generateToken(
                         dbUser.getEmail(),
-                        dbUser.getRole());
+                        role);
 
                 return ResponseEntity.ok(Map.of(
                         "success", true,
                         "token", token,
-                        "role", dbUser.getRole()));
+                        "role", role));
             }
         }
 

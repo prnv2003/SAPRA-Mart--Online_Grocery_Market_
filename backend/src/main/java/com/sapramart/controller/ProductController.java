@@ -38,6 +38,22 @@ public class ProductController {
                     .body(Map.of("message", "Product already exists"));
         }
 
+        if (product.getName() == null || product.getName().isEmpty()) {
+            return ResponseEntity.badRequest().body("Product name required");
+        }
+
+        if (product.getCategory() == null || product.getCategory().isEmpty()) {
+            return ResponseEntity.badRequest().body("Category required");
+        }
+
+        if (product.getPrice() <= 0) {
+            return ResponseEntity.badRequest().body("Valid price required");
+        }
+
+        if (product.getQuantity() < 0) {
+            return ResponseEntity.badRequest().body("Valid quantity required");
+        }
+
         Product saved = productRepository.save(product);
 
         return ResponseEntity.ok(Map.of(
