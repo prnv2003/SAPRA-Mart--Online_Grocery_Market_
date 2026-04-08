@@ -132,7 +132,11 @@ function Products() {
   };
 
   const filteredProducts = products
-    .filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    .filter(
+      (p) =>
+        (p.name || "").toLowerCase().includes(search.toLowerCase()) &&
+        (p.category || "").toLowerCase().includes(categoryFilter.toLowerCase()),
+    )
     .filter((p) => (categoryFilter ? p.category === categoryFilter : true))
     .sort((a, b) => {
       if (sortType === "priceLow") return a.price - b.price;
@@ -159,6 +163,8 @@ function Products() {
 
     saveAs(file, "SapraProducts.xlsx");
   };
+
+  if (!products) return null;
 
   return (
     <div className="products-layout">
@@ -240,7 +246,6 @@ function Products() {
             <option value="Cleaning">Cleaning</option>
             <option value="Personal Care">Personal Care</option>
             <option value="Frozen">Frozen</option>
-
           </select>
 
           {/* SORT */}
@@ -282,11 +287,11 @@ function Products() {
               <tbody>
                 {filteredProducts.map((p) => (
                   <tr key={p.id} className={p.quantity < 5 ? "low-stock" : ""}>
-                    <td>{p.name}</td>
-                    <td>{p.category}</td>
-                    <td>₹{p.price}</td>
+                    <td>{p.name || "-"}</td>
+                    <td>{p.category || "-"}</td>
+                    <td>₹{p.price || "-"}</td>
                     <td>
-                      {p.quantity}
+                      {p.quantity || "-"}
                       {p.quantity < 10 && (
                         <span className="low-badge">Low</span>
                       )}
