@@ -59,9 +59,9 @@ function Dashboard() {
         <div className="header">
           <h2>Welcome back, Pranav 👋</h2>
 
-          <button className="logout-btn" onClick={handleLogout}>
+          {/* <button className="logout-btn" onClick={handleLogout}>
             ⎋ Logout
-          </button>
+          </button> */}
         </div>
 
         {/* STATS */}
@@ -136,6 +136,11 @@ function Dashboard() {
             </table>
           )}
         </div>
+
+          <button className="logout-btn" onClick={handleLogout}>
+            ⎋ Logout
+          </button>
+
       </div>
     </div>
   );

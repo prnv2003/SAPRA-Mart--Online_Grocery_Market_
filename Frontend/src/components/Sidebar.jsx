@@ -45,6 +45,8 @@ function Sidebar() {
       <div
         ref={sidebarRef}
         className={`sidebar ${isMobile ? (open ? "active" : "") : ""}`}
+
+        // className={`sidebar ${open ? "open" : ""}`}
       >
         <h3>SAPRA Mart</h3>
 
@@ -56,6 +58,8 @@ function Sidebar() {
           Products
         </Link>
       </div>
+
+      
     </>
   );
 }
