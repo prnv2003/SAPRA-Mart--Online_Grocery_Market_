@@ -1,0 +1,189 @@
+ * {
+  box-sizing: border-box;
+}
+
+/* ================= LAYOUT ================= */
+.shop-layout {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f7fa;
+}
+
+/* ================= SIDEBAR ================= */
+.shop-sidebar {
+  width: 220px;
+  background: #006600;
+  background: linear-gradient(180deg, #009900, #006600);
+  color: white;
+  padding: 20px;
+}
+
+.shop-sidebar h3 {
+  margin-bottom: 20px;
+}
+
+.shop-sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.shop-sidebar li {
+  margin: 15px 0;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.shop-sidebar li:hover {
+  transform: translateX(5px);
+}
+
+/* ================= MAIN ================= */
+.shop-main {
+  flex: 1;
+  padding: 20px;
+}
+
+/* ================= NAVBAR ================= */
+.shop-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-actions input {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.cart-wrapper {
+  position: relative;
+}
+
+.cart-btn {
+  background: #009900;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.cart-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: red;
+  color: white;
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 50%;
+}
+
+.profile {
+  background: #eee;
+  padding: 8px;
+  border-radius: 50%;
+}
+
+/* ================= GRID ================= */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+/* ================= CARD ================= */
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: left;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+
+  height: 260px; /* ✅ FIX HEIGHT */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+}
+
+/* IMAGE FIX */
+.product-card img {
+  width: 100%;
+  height: 120px; /* ✅ FIXED */
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* TEXT */
+.product-card h4 {
+  font-size: 14px;
+}
+
+.category {
+  font-size: 12px;
+  color: #777;
+}
+
+.price {
+  font-weight: bold;
+  margin: 5px 0;
+}
+
+/* BUTTON */
+.add-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #00c853, #009900);
+  color: white;
+  border: none;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.add-btn:hover {
+  transform: scale(1.05);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .shop-layout {
+    flex-direction: column;
+  }
+
+  .shop-sidebar {
+    display: none;
+  }
+
+  .shop-navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .nav-actions {
+    width: 100%;
+  }
+
+  .nav-actions input {
+    flex: 1;
+    width: 100%;
+  }
+}

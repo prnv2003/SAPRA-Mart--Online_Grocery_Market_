@@ -3,11 +3,17 @@ import { getAuthHeader } from "./api";
 const PRODUCT_URL = "http://localhost:8080/api/products";
 
 export const getProducts = async () => {
+  const token = localStorage.getItem("token");
+
   const res = await fetch(PRODUCT_URL, {
     headers: {
-      ...getAuthHeader(),
+      Authorization: `Bearer ${token}`,
     },
   });
+
+  // if (!res.ok) {
+  //   throw new Error("Failed to fetch products");
+  // }
 
   return res.json();
 };

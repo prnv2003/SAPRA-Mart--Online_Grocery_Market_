@@ -38,7 +38,7 @@ function Login() {
         setTimeout(() => {
           if (res.role === "ADMIN") {
             navigate("/dashboard");
-          } else {
+          } else if (res.role === "CUSTOMER") {
             navigate("/shop");
           }
         }, 1200);
