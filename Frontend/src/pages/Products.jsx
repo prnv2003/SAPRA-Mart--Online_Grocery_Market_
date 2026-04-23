@@ -3,9 +3,11 @@ import Sidebar from "../components/Sidebar";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import {
+  // eslint-disable-next-line no-unused-vars
   addProduct,
   getProducts,
   deleteProduct,
+  // eslint-disable-next-line no-unused-vars
   updateProduct,
 } from "../services/productApi";
 import "../styles/Products.css";
@@ -22,6 +24,8 @@ function Products() {
     price: "",
     quantity: "",
   });
+
+  const [image, setImage] = useState(null);
 
   const [editId, setEditId] = useState(null);
 
@@ -61,51 +65,45 @@ function Products() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // ✅ VALIDATION
     if (!form.name || !form.category || !form.price || !form.quantity) {
       alert("Please fill all fields ❌");
       return;
     }
 
-    // ✅ CONVERT TYPES
-    const productData = {
-      name: form.name.trim(),
-      category: form.category.trim(),
-      price: Number(form.price),
-      quantity: Number(form.quantity),
-    };
-
     try {
-      if (editId) {
-        // ✏️ UPDATE PRODUCT
-        await updateProduct(editId, productData);
-        setToast({
-          show: true,
-          message: "Product updated ✅",
-          type: "success",
-        });
-        setEditId(null);
-      } else {
-        // ➕ ADD PRODUCT
-        await addProduct(productData);
-        setToast({ show: true, message: "Product added 🎉", type: "success" });
-      }
+      const formData = new FormData();
 
-      // 🔄 RELOAD PRODUCTS
+      formData.append("name", form.name);
+      formData.append("category", form.category);
+      formData.append("price", form.price);
+      formData.append("quantity", form.quantity);
+      formData.append("image", image); // 👈 important
+
+      await fetch("http://localhost:8080/products/add", {
+        method: "POST",
+        body: formData,
+      });
+
+      setToast({
+        show: true,
+        message: "Product added 🎉",
+        type: "success",
+      });
+
       await loadProducts();
 
-      // 🧹 RESET FORM
       setForm({
         name: "",
         category: "",
         price: "",
         quantity: "",
       });
+
+      setImage(null);
     } catch (error) {
-      //  🔥 HANDLE DUPLICATE ERROR
       setToast({
         show: true,
-        message: error.message || "Product already exists ❌",
+        message: "Error adding product ❌",
         type: "error",
       });
     }
@@ -213,11 +211,14 @@ function Products() {
             value={form.quantity}
             onChange={handleChange}
             required
-          />
+            />
+
+          <input type="file" onChange={(e) => setImage(e.target.files[0])} />
 
           <button type="submit">
             {editId ? "Update Product" : "Add Product"}
           </button>
+
         </form>
 
         <br />

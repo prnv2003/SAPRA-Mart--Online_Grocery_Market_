@@ -4,12 +4,16 @@ import com.sapramart.model.Product;
 import com.sapramart.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
+// import java.util.*;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import java.io.File;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,6 +27,11 @@ public class ProductController {
     @GetMapping
     public List<Product> getAllProducts() {
         return productRepository.findAll();
+    }
+
+    @GetMapping("/category/{category}")
+    public List<Product> getByCategory(@PathVariable String category) {
+        return productRepository.findByCategory(category);
     }
 
     // ✅ ADD PRODUCT
@@ -59,6 +68,33 @@ public class ProductController {
         return ResponseEntity.ok(Map.of(
                 "message", "Product added successfully",
                 "data", saved));
+    }
+
+    @PostMapping("/add")
+    public Product addProduct(
+            @RequestParam String name,
+            @RequestParam String category,
+            @RequestParam int price,
+            @RequestParam int quantity,
+            @RequestParam("image") MultipartFile file) throws IOException {
+
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+        String uploadDir = "uploads/";
+        File uploadPath = new File(uploadDir);
+        if (!uploadPath.exists())
+            uploadPath.mkdirs();
+
+        file.transferTo(new File(uploadDir + fileName));
+
+        Product p = new Product();
+        p.setName(name);
+        p.setCategory(category);
+        p.setPrice(price);
+        p.setQuantity(quantity);
+        p.setImage(fileName);
+
+        return productRepository.save(p);
     }
 
     // ✅ UPDATE PRODUCT

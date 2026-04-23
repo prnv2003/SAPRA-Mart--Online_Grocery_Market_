@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Products from "./pages/Products";
 import Shop from "./pages/Shop";
+import CategoryPage from "./pages/categories/CategoryPage";
 
 function App() {
   const PrivateRoute = ({ children, roleRequired }) => {
@@ -64,6 +65,8 @@ function App() {
         />
 
         <Route path="/shop" element={<Shop />} />
+
+        <Route path="/category/:name" element={<CategoryPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -14,6 +14,7 @@ public class Product {
     private String category;
     private double price;
     private int quantity;
+    private String image;
 
     // GETTERS & SETTERS
 
@@ -55,5 +56,13 @@ public class Product {
 
     public void setQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 }
