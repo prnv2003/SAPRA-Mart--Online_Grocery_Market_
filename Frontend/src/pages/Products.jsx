@@ -3,11 +3,9 @@ import Sidebar from "../components/Sidebar";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import {
-  // eslint-disable-next-line no-unused-vars
   addProduct,
   getProducts,
   deleteProduct,
-  // eslint-disable-next-line no-unused-vars
   updateProduct,
 } from "../services/productApi";
 import "../styles/Products.css";
@@ -18,6 +16,7 @@ function Products() {
   const [sortType, setSortType] = useState("");
 
   const [products, setProducts] = useState([]);
+
   const [form, setForm] = useState({
     name: "",
     category: "",
@@ -26,12 +25,7 @@ function Products() {
   });
 
   const [image, setImage] = useState(null);
-
   const [editId, setEditId] = useState(null);
-
-  useEffect(() => {
-    loadProducts();
-  }, []);
 
   const [toast, setToast] = useState({
     show: false,
@@ -39,7 +33,10 @@ function Products() {
     type: "",
   });
 
-  // Auto-hide toast notification after 2500ms
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
   useEffect(() => {
     if (toast.show) {
       setTimeout(() => {
@@ -48,6 +45,7 @@ function Products() {
     }
   }, [toast]);
 
+  // ✅ LOAD PRODUCTS
   const loadProducts = async () => {
     try {
       const data = await getProducts();
@@ -57,11 +55,12 @@ function Products() {
     }
   };
 
+  // ✅ INPUT CHANGE
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // 🔥 FIXED HANDLE SUBMIT
+  // ✅ ADD / UPDATE PRODUCT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -71,24 +70,21 @@ function Products() {
     }
 
     try {
-      const formData = new FormData();
+      if (editId) {
+        await updateProduct(editId, form);
+        setToast({ show: true, message: "Updated ✅", type: "success" });
+      } else {
+        const formData = new FormData();
 
-      formData.append("name", form.name);
-      formData.append("category", form.category);
-      formData.append("price", form.price);
-      formData.append("quantity", form.quantity);
-      formData.append("image", image); // 👈 important
+        formData.append("name", form.name);
+        formData.append("category", form.category);
+        formData.append("price", form.price);
+        formData.append("quantity", form.quantity);
+        formData.append("image", image);
 
-      await fetch("http://localhost:8080/products/add", {
-        method: "POST",
-        body: formData,
-      });
-
-      setToast({
-        show: true,
-        message: "Product added 🎉",
-        type: "success",
-      });
+        await addProduct(formData);
+        setToast({ show: true, message: "Added 🎉", type: "success" });
+      }
 
       await loadProducts();
 
@@ -100,69 +96,48 @@ function Products() {
       });
 
       setImage(null);
+      setEditId(null);
     } catch (error) {
-      setToast({
-        show: true,
-        message: "Error adding product ❌",
-        type: "error",
-      });
+      console.error(error);
+      setToast({ show: true, message: "Error ❌", type: "error" });
     }
   };
 
+  // ✅ EDIT
   const handleEdit = (product) => {
-    setForm({
-      name: product.name,
-      category: product.category,
-      price: product.price,
-      quantity: product.quantity,
-    });
+    setForm(product);
     setEditId(product.id);
   };
 
+  // ✅ DELETE
   const handleDelete = async (id) => {
-    try {
-      await deleteProduct(id);
-      alert("Product deleted 🗑️");
-      loadProducts();
-    } catch (error) {
-      alert("Delete failed ❌");
-    }
+    await deleteProduct(id);
+    loadProducts();
   };
 
+  // ✅ FILTER + SORT
   const filteredProducts = products
     .filter(
       (p) =>
         (p.name || "").toLowerCase().includes(search.toLowerCase()) &&
-        (p.category || "").toLowerCase().includes(categoryFilter.toLowerCase()),
+        (categoryFilter ? p.category === categoryFilter : true)
     )
-    .filter((p) => (categoryFilter ? p.category === categoryFilter : true))
     .sort((a, b) => {
       if (sortType === "priceLow") return a.price - b.price;
       if (sortType === "priceHigh") return b.price - a.price;
-      if (sortType === "qtyLow") return a.quantity - b.quantity;
-      if (sortType === "qtyHigh") return b.quantity - a.quantity;
       return 0;
     });
 
+  // ✅ EXPORT
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(products);
-    const workbook = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(products);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Products");
 
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
-
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
-    });
-
-    const file = new Blob([excelBuffer], {
-      type: "application/octet-stream",
-    });
-
-    saveAs(file, "SapraProducts.xlsx");
+    const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const file = new Blob([buffer]);
+    saveAs(file, "products.xlsx");
   };
-
-  if (!products) return null;
 
   return (
     <div className="products-layout">
@@ -170,10 +145,7 @@ function Products() {
 
       {toast.show && (
         <div className={`toast-container ${toast.type}`}>
-          <div className="toast-icon">
-            {toast.type === "success" ? "✅" : "❌"}
-          </div>
-          <div className="toast-text">{toast.message}</div>
+          {toast.message}
         </div>
       )}
 
@@ -184,99 +156,74 @@ function Products() {
         <form onSubmit={handleSubmit} className="product-form">
           <input
             name="name"
-            placeholder="Product Name"
+            placeholder="Name"
             value={form.name}
             onChange={handleChange}
-            required
           />
           <input
             name="category"
             placeholder="Category"
             value={form.category}
             onChange={handleChange}
-            required
           />
           <input
             name="price"
-            placeholder="Price"
             type="number"
+            placeholder="Price"
             value={form.price}
             onChange={handleChange}
-            required
           />
           <input
             name="quantity"
-            placeholder="Quantity"
             type="number"
+            placeholder="Quantity"
             value={form.quantity}
             onChange={handleChange}
-            required
-            />
+          />
 
+          {/* IMAGE INPUT */}
           <input type="file" onChange={(e) => setImage(e.target.files[0])} />
 
           <button type="submit">
             {editId ? "Update Product" : "Add Product"}
           </button>
-
         </form>
 
-        <br />
-        {/* SEARCH */}
+        {/* FILTER */}
         <div className="filters">
           <input
-            type="text"
-            placeholder="Search product 🔍"
+            placeholder="Search 🔍"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
 
-          {/* CATEGORY FILTER */}
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-          >
-            <option value="">All Categories</option>
-            <option value="Grains">Grains</option>
-            <option value="Dairy">Dairy</option>
-            <option value="Fruits">Fruits</option>
-            <option value="Vegetables">Vegetables</option>
+          <select onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option value="">All</option>
+            <option value="Dairy, Bread & Eggs">Dairy, Bread & Eggs</option>
             <option value="Snacks">Snacks</option>
-            <option value="Beverages">Beverages</option>
-            <option value="Essentials">Essentials</option>
-            <option value="Cleaning">Cleaning</option>
-            <option value="Personal Care">Personal Care</option>
-            <option value="Frozen">Frozen</option>
+            <option value="Grains">Grains</option>
           </select>
 
-          {/* SORT */}
-          <select
-            value={sortType}
-            onChange={(e) => setSortType(e.target.value)}
-          >
-            <option value="">Sort By</option>
+          <select onChange={(e) => setSortType(e.target.value)}>
+            <option value="">Sort</option>
             <option value="priceLow">Price ↑</option>
             <option value="priceHigh">Price ↓</option>
-            <option value="qtyLow">Quantity ↑</option>
-            <option value="qtyHigh">Quantity ↓</option>
           </select>
         </div>
 
         <button onClick={exportToExcel} className="export-btn">
-          Export Excel 📁
+          Export Excel
         </button>
 
         {/* TABLE */}
         <div className="table-wrapper">
           {products.length === 0 ? (
-            <div className="empty-box">
-              <h3>No Products Yet 📦</h3>
-              <p>Add your first product to get started 🚀</p>
-            </div>
+            <p>No products yet</p>
           ) : (
             <table>
               <thead>
                 <tr>
+                  <th>Image</th>
                   <th>Name</th>
                   <th>Category</th>
                   <th>Price</th>
@@ -287,16 +234,21 @@ function Products() {
 
               <tbody>
                 {filteredProducts.map((p) => (
-                  <tr key={p.id} className={p.quantity < 5 ? "low-stock" : ""}>
-                    <td>{p.name || "-"}</td>
-                    <td>{p.category || "-"}</td>
-                    <td>₹{p.price || "-"}</td>
+                  <tr key={p.id}>
                     <td>
-                      {p.quantity || "-"}
-                      {p.quantity < 10 && (
-                        <span className="low-badge">Low</span>
-                      )}
+                      {p.image ? (
+                        <img
+                          src={`http://localhost:8080/uploads/${p.image}`}
+                          width="50"
+                          alt=""
+                        />
+                      ) : "No Image"}
                     </td>
+
+                    <td>{p.name}</td>
+                    <td>{p.category}</td>
+                    <td>₹{p.price}</td>
+                    <td>{p.quantity}</td>
 
                     <td>
                       <button onClick={() => handleEdit(p)}>✏️</button>

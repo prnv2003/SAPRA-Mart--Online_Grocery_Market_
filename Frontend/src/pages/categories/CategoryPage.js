@@ -41,7 +41,7 @@ function CategoryPage() {
     <div style={{ padding: "20px" }}>
       <h2>{name} 🛒</h2>
 
-      {/* <div className="cart">
+      {/* <div className="cart">      
         🛒 <span>{cart.length}</span>
       </div> */}
 

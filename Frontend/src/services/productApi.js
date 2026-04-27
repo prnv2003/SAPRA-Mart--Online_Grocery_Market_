@@ -1,49 +1,40 @@
-import { getAuthHeader } from "./api";
-
 const PRODUCT_URL = "http://localhost:8080/api/products";
 
+// ✅ GET PRODUCTS
 export const getProducts = async () => {
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(PRODUCT_URL, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  // if (!res.ok) {
-  //   throw new Error("Failed to fetch products");
-  // }
-
+  const res = await fetch(PRODUCT_URL);
+  if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 };
 
-export const addProduct = async (data) => {
-  const res = await fetch(PRODUCT_URL, {
+// ✅ ADD PRODUCT WITH IMAGE
+export const addProduct = async (formData) => {
+  const res = await fetch(`${PRODUCT_URL}/add`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      ...getAuthHeader(),
-    },
-    body: JSON.stringify(data),
+    body: formData, // ❌ NO JSON, NO HEADERS
   });
+
+  if (!res.ok) throw new Error("Failed to add product");
 
   return res.json();
 };
 
-// 🗑️ DELETE
+// ✅ DELETE
 export const deleteProduct = async (id) => {
   await fetch(`${PRODUCT_URL}/${id}`, {
     method: "DELETE",
   });
 };
 
-// ✏️ UPDATE
+// ✅ UPDATE
 export const updateProduct = async (id, product) => {
-  const response = await fetch(`${PRODUCT_URL}/${id}`, {
+  const res = await fetch(`${PRODUCT_URL}/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify(product),
   });
-  return response.json();
+
+  return res.json();
 };

@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+// eslint-disable-next-line no-unused-vars
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Products from "./pages/Products";
 import Shop from "./pages/Shop";
