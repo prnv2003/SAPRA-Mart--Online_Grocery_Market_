@@ -8,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 
-// import java.util.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -23,90 +22,76 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    // ✅ GET ALL
+    // ✅ GET ALL PRODUCTS
     @GetMapping
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
+    // ✅ GET BY CATEGORY
     @GetMapping("/category/{category}")
     public List<Product> getByCategory(@PathVariable String category) {
         return productRepository.findByCategory(category);
     }
 
-    // ✅ ADD PRODUCT
-    @PostMapping
-    public ResponseEntity<?> addProduct(@RequestBody Product product) {
-
-        // 🔥 CHECK DUPLICATE
-        Optional<Product> existing = productRepository.findByName(product.getName());
-
-        if (existing.isPresent()) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("message", "Product already exists"));
-        }
-
-        if (product.getName() == null || product.getName().isEmpty()) {
-            return ResponseEntity.badRequest().body("Product name required");
-        }
-
-        if (product.getCategory() == null || product.getCategory().isEmpty()) {
-            return ResponseEntity.badRequest().body("Category required");
-        }
-
-        if (product.getPrice() <= 0) {
-            return ResponseEntity.badRequest().body("Valid price required");
-        }
-
-        if (product.getQuantity() < 0) {
-            return ResponseEntity.badRequest().body("Valid quantity required");
-        }
-
-        Product saved = productRepository.save(product);
-
-        return ResponseEntity.ok(Map.of(
-                "message", "Product added successfully",
-                "data", saved));
-    }
-
+    // ✅ ADD PRODUCT WITH IMAGE (ONLY THIS API)
     @PostMapping("/add")
-    public Product addProduct(
+    public ResponseEntity<?> addProduct(
             @RequestParam String name,
             @RequestParam String category,
             @RequestParam int price,
             @RequestParam int quantity,
-            @RequestParam("image") MultipartFile file) throws IOException {
+            @RequestParam("image") MultipartFile file) {
 
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        try {
 
-        String uploadDir = "uploads/";
-        File uploadPath = new File(uploadDir);
-        if (!uploadPath.exists())
-            uploadPath.mkdirs();
+            // 🔥 Duplicate check
+            Optional<Product> existing = productRepository.findByName(name);
+            if (existing.isPresent()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("message", "Product already exists"));
+            }
 
-        file.transferTo(new File(uploadDir + fileName));
+            // 🔥 Save image
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-        Product p = new Product();
-        p.setName(name);
-        p.setCategory(category);
-        p.setPrice(price);
-        p.setQuantity(quantity);
-        p.setImage(fileName);
+            String uploadDir = "uploads/";
+            File uploadPath = new File(uploadDir);
+            if (!uploadPath.exists())
+                uploadPath.mkdirs();
 
-        return productRepository.save(p);
+            file.transferTo(new File(uploadDir + fileName));
+
+            // 🔥 Save product
+            Product p = new Product();
+            p.setName(name);
+            p.setCategory(category);
+            p.setPrice(price);
+            p.setQuantity(quantity);
+            p.setImage(fileName);
+
+            productRepository.save(p);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "Product added successfully",
+                    "data", p));
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Error saving product"));
+        }
     }
 
-    // ✅ UPDATE PRODUCT
+    // ✅ DELETE
+    @DeleteMapping("/{id}")
+    public void deleteProduct(@PathVariable Long id) {
+        productRepository.deleteById(id);
+    }
+
+    // ✅ UPDATE (without image for now)
     @PutMapping("/{id}")
     public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
         product.setId(id);
         return productRepository.save(product);
-    }
-
-    // ✅ DELETE PRODUCT
-    @DeleteMapping("/{id}")
-    public void deleteProduct(@PathVariable Long id) {
-        productRepository.deleteById(id);
     }
 }
