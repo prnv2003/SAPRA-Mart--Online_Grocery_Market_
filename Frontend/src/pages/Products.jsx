@@ -60,33 +60,40 @@ function Products() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  // ✅ ADD / UPDATE PRODUCT
+  // ✅ ADD / UPDATE PRODUCT   // ✅ FIXED HANDLE SUBMIT
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.name || !form.category || !form.price || !form.quantity) {
-      alert("Please fill all fields ❌");
-      return;
-    }
-
     try {
-      if (editId) {
-        await updateProduct(editId, form);
-        setToast({ show: true, message: "Updated ✅", type: "success" });
-      } else {
-        const formData = new FormData();
+      const formData = new FormData();
 
-        formData.append("name", form.name);
-        formData.append("category", form.category);
-        formData.append("price", form.price);
-        formData.append("quantity", form.quantity);
+      formData.append("name", form.name);
+      formData.append("category", form.category);
+      formData.append("price", form.price);
+      formData.append("quantity", form.quantity);
+
+      if (image) {
         formData.append("image", image);
-
-        await addProduct(formData);
-        setToast({ show: true, message: "Added 🎉", type: "success" });
       }
 
-      await loadProducts();
+      if (editId) {
+        await updateProduct(editId, formData);
+
+        setToast({
+          show: true,
+          message: "Product Updated Successfully 🎉",
+          type: "success",
+        });
+      } else {
+        await addProduct(formData);
+
+        setToast({
+          show: true,
+          message: "Product Added Successfully 🎉",
+          type: "success",
+        });
+      }
 
       setForm({
         name: "",
@@ -97,15 +104,26 @@ function Products() {
 
       setImage(null);
       setEditId(null);
+
+      loadProducts();
     } catch (error) {
-      console.error(error);
-      setToast({ show: true, message: "Error ❌", type: "error" });
+      setToast({
+        show: true,
+        message: "Something went wrong ❌",
+        type: "error",
+      });
     }
   };
-
+  
   // ✅ EDIT
   const handleEdit = (product) => {
-    setForm(product);
+    setForm({
+      name: product.name,
+      category: product.category,
+      price: product.price,
+      quantity: product.quantity,
+      image: product.image,
+    });
     setEditId(product.id);
   };
 
@@ -120,7 +138,7 @@ function Products() {
     .filter(
       (p) =>
         (p.name || "").toLowerCase().includes(search.toLowerCase()) &&
-        (categoryFilter ? p.category === categoryFilter : true)
+        (categoryFilter ? p.category === categoryFilter : true),
     )
     .sort((a, b) => {
       if (sortType === "priceLow") return a.price - b.price;
@@ -144,9 +162,7 @@ function Products() {
       <Sidebar />
 
       {toast.show && (
-        <div className={`toast-container ${toast.type}`}>
-          {toast.message}
-        </div>
+        <div className={`toast-container ${toast.type}`}>{toast.message}</div>
       )}
 
       <div className="products-content">
@@ -182,8 +198,11 @@ function Products() {
           />
 
           {/* IMAGE INPUT */}
-          <input type="file" onChange={(e) => setImage(e.target.files[0])} />
-
+          <input
+            type="file"
+            name="image"
+            onChange={(e) => setImage(e.target.files[0])}
+          />
           <button type="submit">
             {editId ? "Update Product" : "Add Product"}
           </button>
@@ -200,8 +219,20 @@ function Products() {
           <select onChange={(e) => setCategoryFilter(e.target.value)}>
             <option value="">All</option>
             <option value="Dairy, Bread & Eggs">Dairy, Bread & Eggs</option>
-            <option value="Snacks">Snacks</option>
-            <option value="Grains">Grains</option>
+            <option value="Snacks & Munchies">Snacks & Munchies</option>
+            <option value="Atta, Rice & Dal">Atta, Rice & Dal</option>
+            <option value="Masala, Oil & More">Masala, Oil & More</option>
+            <option value="Breakfast & Instant Food">
+              Breakfast & Instant Food
+            </option>
+            <option value="Tea, Coffee & Milk Drinks">
+              Tea, Coffee & Milk Drinks
+            </option>
+            <option value="Cold Drinks & Juices">Cold Drinks & Juices</option>
+            <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+            <option value="Personal Care">Personal Care</option>
+            <option value="Cleaning Essentials">Cleaning Essentials</option>
+            <option value="Frozen">Frozen</option>
           </select>
 
           <select onChange={(e) => setSortType(e.target.value)}>
@@ -242,7 +273,9 @@ function Products() {
                           width="50"
                           alt=""
                         />
-                      ) : "No Image"}
+                      ) : (
+                        "No Image"
+                      )}
                     </td>
 
                     <td>{p.name}</td>

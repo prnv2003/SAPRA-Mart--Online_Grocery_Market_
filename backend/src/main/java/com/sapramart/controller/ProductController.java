@@ -5,14 +5,11 @@ import com.sapramart.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.Map;
-import java.io.File;
 
 @RestController
 @RequestMapping("/api/products")
@@ -22,76 +19,95 @@ public class ProductController {
     @Autowired
     private ProductRepository productRepository;
 
-    // ✅ GET ALL PRODUCTS
+    // GET ALL
     @GetMapping
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
 
-    // ✅ GET BY CATEGORY
+    // GET CATEGORY
     @GetMapping("/category/{category}")
     public List<Product> getByCategory(@PathVariable String category) {
         return productRepository.findByCategory(category);
     }
 
-    // ✅ ADD PRODUCT WITH IMAGE (ONLY THIS API)
+    // ADD PRODUCT
     @PostMapping("/add")
-    public ResponseEntity<?> addProduct(
+    public Product addProduct(
             @RequestParam String name,
             @RequestParam String category,
-            @RequestParam int price,
+            @RequestParam double price,
             @RequestParam int quantity,
-            @RequestParam("image") MultipartFile file) {
+            @RequestParam(value = "image", required = false) MultipartFile file) throws IOException {
 
-        try {
+        Product p = new Product();
 
-            // 🔥 Duplicate check
-            Optional<Product> existing = productRepository.findByName(name);
-            if (existing.isPresent()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("message", "Product already exists"));
-            }
+        p.setName(name);
+        p.setCategory(category);
+        p.setPrice(price);
+        p.setQuantity(quantity);
 
-            // 🔥 Save image
+        if (file != null && !file.isEmpty()) {
+
+            String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
+            File folder = new File(uploadDir);
+
+            if (!folder.exists())
+                folder.mkdirs();
+
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-            String uploadDir = "uploads/";
-            File uploadPath = new File(uploadDir);
-            if (!uploadPath.exists())
-                uploadPath.mkdirs();
+            File destination = new File(folder, fileName);
 
-            file.transferTo(new File(uploadDir + fileName));
+            file.transferTo(destination);
 
-            // 🔥 Save product
-            Product p = new Product();
-            p.setName(name);
-            p.setCategory(category);
-            p.setPrice(price);
-            p.setQuantity(quantity);
             p.setImage(fileName);
-
-            productRepository.save(p);
-
-            return ResponseEntity.ok(Map.of(
-                    "message", "Product added successfully",
-                    "data", p));
-
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "Error saving product"));
         }
+
+        return productRepository.save(p);
     }
 
-    // ✅ DELETE
+    // UPDATE PRODUCT
+    @PutMapping("/{id}")
+    public Product updateProduct(
+            @PathVariable Long id,
+            @RequestParam String name,
+            @RequestParam String category,
+            @RequestParam double price,
+            @RequestParam int quantity,
+            @RequestParam(value = "image", required = false) MultipartFile file) throws IOException {
+
+        Product existing = productRepository.findById(id).orElseThrow();
+
+        existing.setName(name);
+        existing.setCategory(category);
+        existing.setPrice(price);
+        existing.setQuantity(quantity);
+
+        // If new image selected
+        if (file != null && !file.isEmpty()) {
+
+            String uploadDir = System.getProperty("user.dir") + File.separator + "uploads";
+
+            File folder = new File(uploadDir);
+            if (!folder.exists())
+                folder.mkdirs();
+
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+            File destination = new File(folder, fileName);
+
+            file.transferTo(destination);
+
+            existing.setImage(fileName);
+        }
+
+        return productRepository.save(existing);
+    }
+
+    // DELETE
     @DeleteMapping("/{id}")
     public void deleteProduct(@PathVariable Long id) {
         productRepository.deleteById(id);
-    }
-
-    // ✅ UPDATE (without image for now)
-    @PutMapping("/{id}")
-    public Product updateProduct(@PathVariable Long id, @RequestBody Product product) {
-        product.setId(id);
-        return productRepository.save(product);
     }
 }

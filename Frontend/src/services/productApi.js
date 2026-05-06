@@ -1,40 +1,38 @@
 const PRODUCT_URL = "http://localhost:8080/api/products";
 
-// ✅ GET PRODUCTS
 export const getProducts = async () => {
   const res = await fetch(PRODUCT_URL);
-  if (!res.ok) throw new Error("Failed to fetch");
-  return res.json();
+  return await res.json();
 };
 
-// ✅ ADD PRODUCT WITH IMAGE
 export const addProduct = async (formData) => {
   const res = await fetch(`${PRODUCT_URL}/add`, {
     method: "POST",
-    body: formData, // ❌ NO JSON, NO HEADERS
+    body: formData,
   });
 
-  if (!res.ok) throw new Error("Failed to add product");
+  if (!res.ok) {
+    throw new Error("Failed to add product");
+  }
 
-  return res.json();
+  return await res.json();
 };
 
-// ✅ DELETE
 export const deleteProduct = async (id) => {
   await fetch(`${PRODUCT_URL}/${id}`, {
     method: "DELETE",
   });
 };
 
-// ✅ UPDATE
-export const updateProduct = async (id, product) => {
+export const updateProduct = async (id, formData) => {
   const res = await fetch(`${PRODUCT_URL}/${id}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(product),
+    body: formData,
   });
 
-  return res.json();
+  if (!res.ok) {
+    throw new Error("Failed to update");
+  }
+
+  return await res.json();
 };
